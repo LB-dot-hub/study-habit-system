@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习习惯打分系统</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    #header h1 {
+      font-size: 1.5rem; /* 使用相对单位 */
+      color: #333;
+      margin: 0;
+    }
+    
+    #header button {
+      padding: 0.5em 1em; /* 相对大小 */
+      font-size: 1rem;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    #header button:hover {
+      background-color: #0056b3;
+    }
+    
+    #timer-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      border: 2px solid #007BFF;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      width: 80%; /* 相对宽度 */
+      max-width: 300px; /* 最大宽度 */
+      min-width: 200px; /* 最小宽度 */
+      z-index: 1000;
+    }
+    
+    #timer {
+      font-size: 2rem; /* 使用相对字体大小 */
+      font-weight: bold;
+      color: #ff4500;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .timer-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      padding: 0.5em 1em; /* 相对大小 */
+      font-size: 1rem; /* 字体大小适应设备 */
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    button:hover {
+      background-color: #0056b3;
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    #score-container {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      text-align: center;
+      background-color: #f0f8ff;
+      border: 2px solid #007BFF;
+      border-radius: 10px;
+      padding: 1rem;
+      width: 80%; /* 相对宽度 */
+      max-width: 300px; /* 最大宽度 */
+      min-width: 200px; /* 最小宽度 */
+      z-index: 1000;
+    }
+    
+    #score {
+      font-size: 2.5rem; /* 相对字体大小 */
+      font-weight: bold;
+      color: #007BFF;
+    }
+    
+    #encouragement {
+      font-size: 1.2rem; /* 相对字体大小 */
+      color: #333;
+      margin-top: 10px;
+    }
+    
+    #quote {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 15px;
+      font-style: italic;
+    }
+    
+    /* 小屏幕优化 */
+    @media (max-width: 600px) {
+      #timer-container {
+        position: relative; /* 改为相对位置 */
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100%; /* 全屏宽度 */
+        margin-bottom: 10px;
+      }
+    
+      #score-container {
+        position: relative; /* 改为相对位置 */
+        top: 0;
+        right: 0;
+        width: 100%; /* 全屏宽度 */
+        margin-bottom: 10px;
+      }
+    
+      #score {
+        font-size: 2rem; /* 缩小字体 */
+      }
+    
+      #timer {
+        font-size: 1.8rem; /* 缩小字体 */
+      }
+    }
+
+  </style>
+
+</head>
+<body>
+  <div id="header">
+    <h1>学习习惯打分系统</h1>
+    <button onclick="resetSystem()">复位</button>
+  </div>
+
+<div id="timer-container">
+    <div id="timer">90:00</div>
+    <div class="timer-buttons">
+      <button id="start-timer" onclick="startTimer()">开始</button>
+      <button id="pause-timer" onclick="pauseTimer()" disabled>暂停</button>
+      <button id="reset-timer" onclick="resetTimer()">复位</button>
+    </div>
+  </div>
+
+<div id="score-container">
+    <p><strong>当前得分：</strong></p>
+    <p id="score">0</p>
+    <p id="encouragement">加油！开始完成第一个任务吧！</p>
+    <p id="quote">"勤奋是成功之母。" —— 本杰明·富兰克林</p>
+  </div>
+
+<script>
+    // JavaScript 部分保持不变，与之前相同
+    let timerInterval;
+    let remainingSeconds = 90 * 60;
+
+    function startTimer() {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (remainingSeconds > 0) {
+          remainingSeconds--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(timerInterval);
+          document.getElementById("timer").textContent = "时间到！";
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      remainingSeconds = 90 * 60;
+      updateTimerDisplay();
+    }
+
+    function updateTimerDisplay() {
+      const minutes = Math.floor(remainingSeconds / 60);
+      const seconds = remainingSeconds % 60;
+      document.getElementById("timer").textContent = `${minutes}:${seconds
+        .toString()
+        .padStart(2, "0")}`;
+    }
+
+    function resetSystem() {
+      resetTimer();
+      document.getElementById("score").textContent = "0";
+      document.getElementById("encouragement").textContent =
+        "加油！开始完成第一个任务吧！";
+    }
+  </script>
+
+</body>
+</html>
