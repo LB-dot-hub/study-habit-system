@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>学习习惯打分系统</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+
+    #header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    #header h1 {
+      font-size: 1.5rem;
+      color: #333;
+      margin: 0;
+    }
+    
+    #header button {
+      padding: 0.5em 1em;
+      font-size: 1rem;
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    
+    #header button:hover {
+      background-color: #0056b3;
+    }
+    
+    #timer-container {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+      border: 2px solid #007BFF;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      width: 80%;
+      max-width: 300px;
+      min-width: 200px;
+      z-index: 1000;
+    }
+    
+    #timer {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ff4500;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .timer-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    #score-container {
+      position: fixed;
+      top: 120px;
+      right: 20px;
+      text-align: center;
+      background-color: #f0f8ff;
+      border: 2px solid #007BFF;
+      border-radius: 10px;
+      padding: 1rem;
+      width: 80%;
+      max-width: 300px;
+      min-width: 200px;
+      z-index: 1000;
+    }
+    
+    #score {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #007BFF;
+    }
+    
+    #encouragement {
+      font-size: 1.2rem;
+      color: #333;
+      margin-top: 10px;
+    }
+    
+    #quote {
+      font-size: 0.9rem;
+      color: #555;
+      margin-top: 15px;
+      font-style: italic;
+    }
+    
+    #app {
+      margin-top: 200px; /* 确保待办事项内容不被遮挡 */
+    }
+    
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .task {
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    
+    .completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    
+    .section {
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 600px) {
+      #timer-container {
+        position: relative;
+        top: 0;
+        left: 0;
+        transform: none;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    
+      #score-container {
+        position: relative;
+        top: 0;
+        right: 0;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+    
+      #score {
+        font-size: 2rem;
+      }
+    
+      #timer {
+        font-size: 1.8rem;
+      }
+    
+      #app {
+        margin-top: 20px;
+      }
+    }
+
+  </style>
+
+</head>
+<body>
+  <div id="header">
+    <h1>学习习惯打分系统</h1>
+    <button onclick="resetSystem()">复位</button>
+  </div>
+
+<div id="timer-container">
+    <div id="timer">90:00</div>
+    <div class="timer-buttons">
+      <button id="start-timer" onclick="startTimer()">开始</button>
+      <button id="pause-timer" onclick="pauseTimer()" disabled>暂停</button>
+      <button id="reset-timer" onclick="resetTimer()">复位</button>
+    </div>
+  </div>
+
+<div id="score-container">
+    <p><strong>当前得分：</strong></p>
+    <p id="score">0</p>
+    <p id="encouragement">加油！开始完成第一个任务吧！</p>
+    <p id="quote">"勤奋是成功之母。" —— 本杰明·富兰克林</p>
+  </div>
+
+<div id="app"></div>
+
+<script>
+    const originalSections = [
+      {
+        title: "作业前准备",
+        tasks: [
+          { name: "红领巾，校卡装在书包最外侧包里", weight: 5, completed: false },
+          { name: "削铅笔，准备直尺，橡皮，数学作业要准备草稿本", weight: 5, completed: false },
+          { name: "保持桌面整洁，桌面不放学习无关的东西", weight: 5, completed: false },
+          { name: "书包挂在桌子侧面", weight: 5, completed: false }
+        ]
+      },
+      {
+        title: "写作业中",
+        tasks: [
+          { name: "精神专注，坐姿端正，不吃东西，不讲闲话，不玩玩具，不跑来跑去", weight: 10, completed: false },
+          { name: "遇到难题要先自己钻研解决，特别是仿写句子，写作", weight: 10, completed: false },
+          { name: "认真读题，指读题目，从第一个字读到最后一个字", weight: 10, completed: false },
+          { name: "每天作业在90分钟内完成", weight: 10, completed: false },
+          { name: "完成作业先自己检查", weight: 10, completed: false }
+        ]
+      },
+      {
+        title: "收尾",
+        tasks: [
+          { name: "对照作业登记本，保证所有作业都装进了书包", weight: 7.5, completed: false },
+          { name: "对照课程表，保证需要的课本（包括美术工具）都装进书包", weight: 7.5, completed: false },
+          { name: "检查文具盒，至少2根削过的铅笔，1把直尺，1块橡皮", weight: 7.5, completed: false },
+          { name: "书包挂回书桌侧面", weight: 7.5, completed: false }
+        ]
+      }
+    ];
+
+    let sections = JSON.parse(JSON.stringify(originalSections));
+
+    function renderApp() {
+      const app = document.getElementById("app");
+      app.innerHTML = "";
+
+      sections.forEach((section, sectionIndex) => {
+        const sectionDiv = document.createElement("div");
+        sectionDiv.className = "section";
+
+        const sectionTitle = document.createElement("h2");
+        sectionTitle.textContent = section.title;
+        sectionDiv.appendChild(sectionTitle);
+
+        const taskList = document.createElement("ul");
+        section.tasks.forEach((task, taskIndex) => {
+          const li = document.createElement("li");
+          li.className = `task ${task.completed ? "completed" : ""}`;
+          li.textContent = `${task.name} (${task.weight}分)`;
+          li.onclick = () => toggleTask(sectionIndex, taskIndex);
+          taskList.appendChild(li);
+        });
+
+        sectionDiv.appendChild(taskList);
+        app.appendChild(sectionDiv);
+      });
+    }
+
+    function toggleTask(sectionIndex, taskIndex) {
+      const task = sections[sectionIndex].tasks[taskIndex];
+      task.completed = !task.completed;
+      renderApp();
+    }
+
+    function resetSystem() {
+      sections = JSON.parse(JSON.stringify(originalSections));
+      renderApp();
+    }
+
+    renderApp();
+  </script>
+
+</body>
+</html>
